@@ -1,4 +1,12 @@
-#define NDEBUG
+/*
+Need to update so it ONLY returns a file name if all is correct.
+Currently the file is only open in scan_file
+
+
+*/
+
+
+//#define NDEBUG
 #include "dbg.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,9 +26,9 @@ int scan_file (const char *filename, int search_len, char **search_for, int *wor
     while(fgets(line, MAX_LINE, file) != NULL){ 
         for (int i = 1; i < search_len; i++){
             if (strcasestr(line, search_for[i]) != NULL){
-                debug("%s", line); 
+                //debug("%s", line); 
                 word_count[i]++; 
-                debug("%s: %d\n", search_for[i], word_count[i]);
+                //debug("%s: %d\n", search_for[i], word_count[i]);
             } 
         }
     }
@@ -74,7 +82,7 @@ error:
     return -1;
 }
 
-int judge_results (int *array, int len)
+int judge_results (int *array, int len, char *filename)
 {
     int found_count = 0;
     int search_count = len - 1;
@@ -84,10 +92,11 @@ int judge_results (int *array, int len)
         }
     }
     if(found_count == search_count){
-        printf("All Serch Terms Matched. %d out of %d\n", found_count, search_count);
+        //printf("All Serch Terms Matched. %d out of %d\n", found_count, search_count);
+        printf("%s\n", filename);
         return 0;
     }
-    printf("No Match Found. %d out of %d\n", found_count, search_count); 
+    //printf("No Match Found. %d out of %d\n", found_count, search_count); 
     return 0;
 
 error:
@@ -98,15 +107,14 @@ error:
 
 int main (int argc, char *argv[])
 {
-
+    #define filename "logfind.c"
     int word_count[argc]; //count status
     check(argc > 1, "USAGE: logfind word word word");
     zero_array(word_count, argc); 
     
-    scan_file("logfind.c", argc, argv, word_count);
-    print_results(argv, word_count, argc);
+    scan_file(filename, argc, argv, word_count);
     
-    judge_results(word_count, argc);
+    judge_results(word_count, argc, filename);
     return 0;
 
 error: 
