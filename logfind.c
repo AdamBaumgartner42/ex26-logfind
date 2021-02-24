@@ -1,8 +1,3 @@
-/*
-use scan_file to go line by line 
-and use strcasestr to see if the 
-line contains the term
-*/
 #define NDEBUG
 #include "dbg.h"
 #include <stdio.h>
@@ -11,25 +6,35 @@ line contains the term
 
 #define MAX_LINE 1024
 
-
 int scan_file (const char *filename, int search_len, char **search_for, int *word_count) 
 {
     char *line = calloc(MAX_LINE, 1); 
-    FILE *file = fopen(filename, "r");
-    
+    FILE *file = fopen(filename, "r");  
+
+
+    check_mem(line);
+    check(file, "Failed to open file: %s", filename);
 
     while(fgets(line, MAX_LINE, file) != NULL){ 
         for (int i = 1; i < search_len; i++){
-            if (strcasestr(line, search_for[i]) != NULL){ // does this get multiple items in the line? 
-                debug("%s", line); // remove the "\n" from line -A: use fgetc and individually parse
-
-                word_count[i]++; // increment 
+            if (strcasestr(line, search_for[i]) != NULL){
+                debug("%s", line); 
+                word_count[i]++; 
                 debug("%s: %d\n", search_for[i], word_count[i]);
             } 
         }
     }
-    
+
+    free(line);
+    fclose(file);
+
     return 0;
+
+error:
+    if(line) free(line);
+    if(file) fclose(file);
+
+    return -1;
 }
 
 int print_results (char **search_for, int *search_count, int len)
@@ -39,6 +44,9 @@ int print_results (char **search_for, int *search_count, int len)
     }
 
     return 0;
+
+error:
+    return -1;
 }
 
 int print_int_array (int *array, int len)
@@ -49,6 +57,9 @@ int print_int_array (int *array, int len)
     printf("\n");
 
     return 0;
+
+error:
+    return -1;
 }
 
 int zero_array (int *array, int len)
@@ -58,6 +69,9 @@ int zero_array (int *array, int len)
     } 
 
     return 0;
+
+error:
+    return -1;
 }
 
 int judge_results (int *array, int len)
@@ -75,14 +89,18 @@ int judge_results (int *array, int len)
     }
     printf("No Match Found. %d out of %d\n", found_count, search_count); 
     return 0;
+
+error:
+    return -1;
 }
 
 
 
 int main (int argc, char *argv[])
 {
-     
+
     int word_count[argc]; //count status
+    check(argc > 1, "USAGE: logfind word word word");
     zero_array(word_count, argc); 
     
     scan_file("logfind.c", argc, argv, word_count);
@@ -90,6 +108,9 @@ int main (int argc, char *argv[])
     
     judge_results(word_count, argc);
     return 0;
+
+error: 
+    return 1;
 }
 
 
