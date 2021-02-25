@@ -1,17 +1,10 @@
-/*
-Need to update so it ONLY returns a file name if all is correct.
-Currently the file is only open in scan_file
-
-
-*/
-
 
 //#define NDEBUG
 #include "dbg.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <glob.h>
 #define MAX_LINE 1024
 
 int scan_file (const char *filename, int search_len, char **search_for, int *word_count) 
@@ -103,18 +96,37 @@ error:
     return -1;
 }
 
+int find_files(glob_t *pglob)
+{
+    int glob_flags = GLOB_TILDE;
+
+    glob("*.c", glob_flags, NULL, pglob);
+    glob("*.h", glob_flags | GLOB_APPEND, NULL, pglob); // what is the '|' doing? 
+    
+    return 0; 
+    
+error:
+    return -1;
+}
+
 
 
 int main (int argc, char *argv[])
 {
-    #define filename "logfind.c"
     int word_count[argc]; //count status
     check(argc > 1, "USAGE: logfind word word word");
-    zero_array(word_count, argc); 
     
-    scan_file(filename, argc, argv, word_count);
-    
-    judge_results(word_count, argc, filename);
+    // Use glob to find files
+    glob_t found_files;
+    find_files(&found_files);
+
+    // Search across the relevant files 
+    for (int i = 0; i < found_files.gl_pathc; i++){
+        zero_array(word_count, argc);  
+        scan_file(found_files.gl_pathv[i], argc, argv, word_count); 
+        judge_results(word_count, argc,found_files.gl_pathv[i]);
+    }
+
     return 0;
 
 error: 
