@@ -19,9 +19,7 @@ int scan_file (const char *filename, int search_len, char **search_for, int *wor
     while(fgets(line, MAX_LINE, file) != NULL){ 
         for (int i = 1; i < search_len; i++){
             if (strcasestr(line, search_for[i]) != NULL){
-                //debug("%s", line); 
                 word_count[i]++; 
-                //debug("%s: %d\n", search_for[i], word_count[i]);
             } 
         }
     }
@@ -85,11 +83,9 @@ int judge_results (int *array, int len, char *filename)
         }
     }
     if(found_count == search_count){
-        //printf("All Serch Terms Matched. %d out of %d\n", found_count, search_count);
         printf("%s\n", filename);
         return 0;
     }
-    //printf("No Match Found. %d out of %d\n", found_count, search_count); 
     return 0;
 
 error:
@@ -99,9 +95,11 @@ error:
 int find_files(glob_t *pglob)
 {
     int glob_flags = GLOB_TILDE;
-
-    glob("*.c", glob_flags, NULL, pglob);
-    glob("*.h", glob_flags | GLOB_APPEND, NULL, pglob); // what is the '|' doing? 
+    // glob_flags =  100000000000 
+    glob("*.c", glob_flags, NULL, pglob); //  100000000000
+    glob_flags = glob_flags | GLOB_APPEND; // bitwise OR  
+    // glob_flags = 100000000001 , see the new '1' at the end? 
+    glob("*.h", glob_flags, NULL, pglob); 
     
     return 0; 
     
@@ -116,6 +114,7 @@ int main (int argc, char *argv[])
     int word_count[argc]; //count status
     check(argc > 1, "USAGE: logfind word word word");
     
+
     // Use glob to find files
     glob_t found_files;
     find_files(&found_files);
